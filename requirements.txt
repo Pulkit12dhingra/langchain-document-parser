@@ -2,6 +2,8 @@
 #    uv pip compile pyproject.toml --no-reuse-hashes --output-file=requirements.txt
 cfgv==3.4.0
     # via pre-commit
+coverage==7.11.1
+    # via pytest-cov
 distlib==0.4.0
     # via virtualenv
 filelock==3.20.0
@@ -17,12 +19,18 @@ packaging==25.0
 platformdirs==4.5.0
     # via virtualenv
 pluggy==1.6.0
-    # via pytest
+    # via
+    #   pytest
+    #   pytest-cov
 pre-commit==4.3.0
     # via document-parser (pyproject.toml)
 pygments==2.19.2
     # via pytest
 pytest==8.4.2
+    # via
+    #   document-parser (pyproject.toml)
+    #   pytest-cov
+pytest-cov==7.0.0
     # via document-parser (pyproject.toml)
 pyyaml==6.0.3
     # via pre-commit
