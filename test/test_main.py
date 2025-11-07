@@ -2,7 +2,7 @@
 
 import pytest
 
-from langchain_document_parser.main import main
+from automated_document_parser.main import main
 
 
 def test_main_runs_successfully(capsys):

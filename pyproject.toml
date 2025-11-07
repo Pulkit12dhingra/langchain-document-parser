@@ -3,7 +3,7 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "langchain-document-parser"
+name = "automated-document-parser"
 version = "0.1.1"
 description = "A document parser built with LangChain"
 readme = "README.md"
@@ -29,12 +29,12 @@ dependencies = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/Pulkit12dhingra/langchain-document-parser"
-Repository = "https://github.com/Pulkit12dhingra/langchain-document-parser"
-Issues = "https://github.com/Pulkit12dhingra/langchain-document-parser/issues"
+Homepage = "https://github.com/Pulkit12dhingra/automated-document-parser"
+Repository = "https://github.com/Pulkit12dhingra/automated-document-parser"
+Issues = "https://github.com/Pulkit12dhingra/automated-document-parser/issues"
 
 [tool.hatch.build.targets.wheel]
-packages = ["src/langchain_document_parser"]
+packages = ["src/automated_document_parser"]
 
 [tool.ruff]
 extend-exclude = ["*.ipynb"]

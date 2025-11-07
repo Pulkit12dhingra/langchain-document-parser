@@ -53,7 +53,7 @@ pluggy==1.6.0
     #   pytest
     #   pytest-cov
 pre-commit==4.3.0
-    # via langchain-document-parser (pyproject.toml)
+    # via automated-document-parser (pyproject.toml)
 pygments==2.19.2
     # via
     #   pytest
@@ -61,10 +61,10 @@ pygments==2.19.2
     #   rich
 pytest==8.4.2
     # via
-    #   langchain-document-parser (pyproject.toml)
+    #   automated-document-parser (pyproject.toml)
     #   pytest-cov
 pytest-cov==7.0.0
-    # via langchain-document-parser (pyproject.toml)
+    # via automated-document-parser (pyproject.toml)
 pyyaml==6.0.3
     # via pre-commit
 readme-renderer==44.0
@@ -81,9 +81,9 @@ rfc3986==2.0.0
 rich==14.2.0
     # via twine
 ruff==0.14.4
-    # via langchain-document-parser (pyproject.toml)
+    # via automated-document-parser (pyproject.toml)
 twine==6.2.0
-    # via langchain-document-parser (pyproject.toml)
+    # via automated-document-parser (pyproject.toml)
 urllib3==2.5.0
     # via
     #   requests
