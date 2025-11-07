@@ -1,7 +1,8 @@
 """Sample test file for main module."""
 
 import pytest
-from main import main
+
+from langchain_document_parser.main import main
 
 
 def test_main_runs_successfully(capsys):
