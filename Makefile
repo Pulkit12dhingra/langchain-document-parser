@@ -55,5 +55,5 @@ publish-pypi: build
 	@echo "Uploading to PyPI..."
 	uv run twine upload dist/* --username __token__ --password "$${PYPI_API_TOKEN}"
 	@echo "Published to PyPI!"
-	@echo "Install with: pip install langchain-document-parser"
+	@echo "Install with: pip install automated-document-parser"
 
