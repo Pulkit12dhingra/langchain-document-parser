@@ -11,7 +11,17 @@ from langchain_core.documents import Document
 
 logger = logging.getLogger(__name__)
 
-PDFLoaderMethod = Literal["pypdf", "unstructured", "amazon_textract"]
+PDFLoaderMethod = Literal[
+    "pypdf",
+    "unstructured",
+    "amazon_textract",
+    "mathpix",
+    "pdfplumber",
+    "pypdfium2",
+    "pymupdf",
+    "pymupdf4llm",
+    "opendataloader",
+]
 
 
 class BasePDFLoader(ABC):

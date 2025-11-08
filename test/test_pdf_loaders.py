@@ -19,6 +19,22 @@ from automated_document_parser.loaders.pdf_load.unstructured_loader import (
 from automated_document_parser.loaders.pdf_load.textract_loader import (
     AmazonTextractPDFLoader,
 )
+from automated_document_parser.loaders.pdf_load.mathpix_loader import (
+    MathpixPDFLoader,
+)
+from automated_document_parser.loaders.pdf_load.pdfplumber_loader import (
+    PDFPlumberLoader,
+)
+from automated_document_parser.loaders.pdf_load.pypdfium2_loader import (
+    PyPDFium2Loader,
+)
+from automated_document_parser.loaders.pdf_load.pymupdf_loader import PyMuPDFLoader
+from automated_document_parser.loaders.pdf_load.pymupdf4llm_loader import (
+    PyMuPDF4LLMLoader,
+)
+from automated_document_parser.loaders.pdf_load.opendataloader_loader import (
+    OpenDataLoaderPDFLoader,
+)
 
 # Check for optional dependencies
 HAS_UNSTRUCTURED = importlib.util.find_spec("langchain_unstructured") is not None
@@ -266,6 +282,351 @@ class TestAmazonTextractPDFLoader:
         )
 
 
+class TestMathpixPDFLoader:
+    """Test Mathpix loader implementation."""
+
+    def test_initialization(self):
+        """MathpixPDFLoader initializes correctly."""
+        loader = MathpixPDFLoader("test.pdf")
+        assert loader.file_path == Path("test.pdf")
+
+    def test_get_install_command(self):
+        """Returns correct install command."""
+        loader = MathpixPDFLoader("test.pdf")
+        cmd = loader.get_install_command()
+        assert "langchain-community" in cmd
+
+    @patch("langchain_community.document_loaders.MathpixPDFLoader")
+    def test_load_with_api_key_in_kwargs(self, mock_mathpix_loader):
+        """Successfully loads with API key in kwargs."""
+        mock_loader_instance = Mock()
+        mock_loader_instance.load.return_value = [
+            Document(page_content="Mathematical content")
+        ]
+        mock_mathpix_loader.return_value = mock_loader_instance
+
+        loader = MathpixPDFLoader("test.pdf", mathpix_api_key="test-key")
+        docs = loader.load()
+
+        assert len(docs) == 1
+        assert docs[0].page_content == "Mathematical content"
+        mock_mathpix_loader.assert_called_once_with("test.pdf")
+
+    @patch.dict("os.environ", {"MATHPIX_API_KEY": "env-key"})
+    @patch("langchain_community.document_loaders.MathpixPDFLoader")
+    def test_load_with_api_key_in_env(self, mock_mathpix_loader):
+        """Successfully loads with API key from environment."""
+        mock_loader_instance = Mock()
+        mock_loader_instance.load.return_value = [Document(page_content="Content")]
+        mock_mathpix_loader.return_value = mock_loader_instance
+
+        loader = MathpixPDFLoader("test.pdf")
+        docs = loader.load()
+
+        assert len(docs) == 1
+
+    @patch.dict("os.environ", {}, clear=True)
+    def test_load_missing_api_key(self):
+        """Raises ValueError when API key is missing."""
+        loader = MathpixPDFLoader("test.pdf")
+        with pytest.raises(ValueError) as exc_info:
+            loader.load()
+
+        assert "MATHPIX_API_KEY not found" in str(exc_info.value)
+
+    @patch("langchain_community.document_loaders.MathpixPDFLoader")
+    def test_load_import_error(self, mock_mathpix_loader):
+        """Handles ImportError gracefully."""
+        mock_mathpix_loader.side_effect = ImportError("No module")
+
+        loader = MathpixPDFLoader("test.pdf", mathpix_api_key="test-key")
+        with pytest.raises(ImportError) as exc_info:
+            loader.load()
+
+        assert "langchain-community is required" in str(exc_info.value)
+
+    @patch.dict("os.environ", {"MATHPIX_API_KEY": "test-key"})
+    @patch("langchain_community.document_loaders.MathpixPDFLoader")
+    def test_load_runtime_error(self, mock_mathpix_loader):
+        """Handles runtime errors gracefully."""
+        mock_mathpix_loader.side_effect = RuntimeError("API error")
+
+        loader = MathpixPDFLoader("test.pdf")
+        with pytest.raises(RuntimeError):
+            loader.load()
+
+
+class TestPDFPlumberLoader:
+    """Test PDFPlumber loader implementation."""
+
+    def test_initialization(self):
+        """PDFPlumberLoader initializes correctly."""
+        loader = PDFPlumberLoader("test.pdf")
+        assert loader.file_path == Path("test.pdf")
+
+    def test_get_install_command(self):
+        """Returns correct install command."""
+        loader = PDFPlumberLoader("test.pdf")
+        cmd = loader.get_install_command()
+        assert "langchain-community" in cmd
+        assert "pdfplumber" in cmd
+
+    @patch("langchain_community.document_loaders.PDFPlumberLoader")
+    def test_load_success(self, mock_pdfplumber_loader):
+        """Successfully loads PDF with PDFPlumber."""
+        mock_loader_instance = Mock()
+        mock_loader_instance.load.return_value = [
+            Document(page_content="Page with tables")
+        ]
+        mock_pdfplumber_loader.return_value = mock_loader_instance
+
+        loader = PDFPlumberLoader("test.pdf")
+        docs = loader.load()
+
+        assert len(docs) == 1
+        assert docs[0].page_content == "Page with tables"
+        mock_pdfplumber_loader.assert_called_once_with("test.pdf")
+
+    @patch("langchain_community.document_loaders.PDFPlumberLoader")
+    def test_load_import_error(self, mock_pdfplumber_loader):
+        """Handles ImportError gracefully."""
+        mock_pdfplumber_loader.side_effect = ImportError("No module")
+
+        loader = PDFPlumberLoader("test.pdf")
+        with pytest.raises(ImportError) as exc_info:
+            loader.load()
+
+        assert "langchain-community and pdfplumber are required" in str(exc_info.value)
+
+    @patch("langchain_community.document_loaders.PDFPlumberLoader")
+    def test_load_runtime_error(self, mock_pdfplumber_loader):
+        """Handles runtime errors gracefully."""
+        mock_pdfplumber_loader.side_effect = RuntimeError("PDF error")
+
+        loader = PDFPlumberLoader("test.pdf")
+        with pytest.raises(RuntimeError):
+            loader.load()
+
+
+class TestPyPDFium2Loader:
+    """Test PyPDFium2 loader implementation."""
+
+    def test_initialization(self):
+        """PyPDFium2Loader initializes correctly."""
+        loader = PyPDFium2Loader("test.pdf")
+        assert loader.file_path == Path("test.pdf")
+
+    def test_get_install_command(self):
+        """Returns correct install command."""
+        loader = PyPDFium2Loader("test.pdf")
+        cmd = loader.get_install_command()
+        assert "langchain-community" in cmd
+        assert "pypdfium2" in cmd
+
+    @patch("langchain_community.document_loaders.PyPDFium2Loader")
+    def test_load_success(self, mock_pypdfium2_loader):
+        """Successfully loads PDF with PyPDFium2."""
+        mock_loader_instance = Mock()
+        mock_loader_instance.load.return_value = [Document(page_content="Content")]
+        mock_pypdfium2_loader.return_value = mock_loader_instance
+
+        loader = PyPDFium2Loader("test.pdf")
+        docs = loader.load()
+
+        assert len(docs) == 1
+        mock_pypdfium2_loader.assert_called_once_with("test.pdf")
+
+    @patch("langchain_community.document_loaders.PyPDFium2Loader")
+    def test_load_import_error(self, mock_pypdfium2_loader):
+        """Handles ImportError gracefully."""
+        mock_pypdfium2_loader.side_effect = ImportError("No module")
+
+        loader = PyPDFium2Loader("test.pdf")
+        with pytest.raises(ImportError) as exc_info:
+            loader.load()
+
+        assert "langchain-community and pypdfium2 are required" in str(exc_info.value)
+
+    @patch("langchain_community.document_loaders.PyPDFium2Loader")
+    def test_load_runtime_error(self, mock_pypdfium2_loader):
+        """Handles runtime errors gracefully."""
+        mock_pypdfium2_loader.side_effect = RuntimeError("PDF error")
+
+        loader = PyPDFium2Loader("test.pdf")
+        with pytest.raises(RuntimeError):
+            loader.load()
+
+
+class TestPyMuPDFLoader:
+    """Test PyMuPDF loader implementation."""
+
+    def test_initialization(self):
+        """PyMuPDFLoader initializes correctly."""
+        loader = PyMuPDFLoader("test.pdf")
+        assert loader.file_path == Path("test.pdf")
+
+    def test_get_install_command(self):
+        """Returns correct install command."""
+        loader = PyMuPDFLoader("test.pdf")
+        cmd = loader.get_install_command()
+        assert "langchain-community" in cmd
+        assert "pymupdf" in cmd
+
+    @patch("langchain_community.document_loaders.PyMuPDFLoader")
+    def test_load_success(self, mock_pymupdf_loader):
+        """Successfully loads PDF with PyMuPDF."""
+        mock_loader_instance = Mock()
+        mock_loader_instance.load.return_value = [Document(page_content="Content")]
+        mock_pymupdf_loader.return_value = mock_loader_instance
+
+        loader = PyMuPDFLoader("test.pdf")
+        docs = loader.load()
+
+        assert len(docs) == 1
+        mock_pymupdf_loader.assert_called_once_with("test.pdf")
+
+    @patch("langchain_community.document_loaders.PyMuPDFLoader")
+    def test_load_import_error(self, mock_pymupdf_loader):
+        """Handles ImportError gracefully."""
+        mock_pymupdf_loader.side_effect = ImportError("No module")
+
+        loader = PyMuPDFLoader("test.pdf")
+        with pytest.raises(ImportError) as exc_info:
+            loader.load()
+
+        assert "langchain-community and pymupdf are required" in str(exc_info.value)
+
+    @patch("langchain_community.document_loaders.PyMuPDFLoader")
+    def test_load_runtime_error(self, mock_pymupdf_loader):
+        """Handles runtime errors gracefully."""
+        mock_pymupdf_loader.side_effect = RuntimeError("PDF error")
+
+        loader = PyMuPDFLoader("test.pdf")
+        with pytest.raises(RuntimeError):
+            loader.load()
+
+
+class TestPyMuPDF4LLMLoader:
+    """Test PyMuPDF4LLM loader implementation."""
+
+    def test_initialization(self):
+        """PyMuPDF4LLMLoader initializes correctly."""
+        loader = PyMuPDF4LLMLoader("test.pdf")
+        assert loader.file_path == Path("test.pdf")
+
+    def test_get_install_command(self):
+        """Returns correct install command."""
+        loader = PyMuPDF4LLMLoader("test.pdf")
+        cmd = loader.get_install_command()
+        assert "langchain-pymupdf4llm" in cmd
+
+    def test_load_success(self):
+        """Successfully loads PDF with PyMuPDF4LLM."""
+        with patch.dict("sys.modules", {"langchain_pymupdf4llm": Mock()}):
+            from unittest.mock import MagicMock
+
+            mock_lc_loader = MagicMock()
+            mock_lc_loader.return_value.load.return_value = [
+                Document(page_content="LLM content")
+            ]
+
+            with patch("langchain_pymupdf4llm.PyMuPDF4LLMLoader", mock_lc_loader):
+                loader = PyMuPDF4LLMLoader("test.pdf")
+                docs = loader.load()
+
+                assert len(docs) == 1
+                assert docs[0].page_content == "LLM content"
+
+    def test_load_import_error(self):
+        """Handles ImportError gracefully."""
+        loader = PyMuPDF4LLMLoader("test.pdf")
+        with pytest.raises(ImportError) as exc_info:
+            loader.load()
+
+        assert "langchain-pymupdf4llm is required" in str(exc_info.value)
+
+    def test_load_runtime_error(self):
+        """Handles runtime errors gracefully."""
+        with patch.dict("sys.modules", {"langchain_pymupdf4llm": Mock()}):
+            mock_lc_loader = Mock(side_effect=RuntimeError("PDF error"))
+
+            with patch("langchain_pymupdf4llm.PyMuPDF4LLMLoader", mock_lc_loader):
+                loader = PyMuPDF4LLMLoader("test.pdf")
+                with pytest.raises(Exception):  # Will catch RuntimeError or ImportError
+                    loader.load()
+
+
+class TestOpenDataLoaderPDFLoader:
+    """Test OpenDataLoader PDF loader implementation."""
+
+    def test_initialization(self):
+        """OpenDataLoaderPDFLoader initializes correctly."""
+        loader = OpenDataLoaderPDFLoader("test.pdf")
+        assert loader.file_path == Path("test.pdf")
+
+    def test_get_install_command(self):
+        """Returns correct install command."""
+        loader = OpenDataLoaderPDFLoader("test.pdf")
+        cmd = loader.get_install_command()
+        assert "langchain-opendataloader-pdf" in cmd
+
+    def test_load_success_default_format(self):
+        """Successfully loads PDF with default format."""
+        with patch.dict("sys.modules", {"langchain_opendataloader_pdf": Mock()}):
+            from unittest.mock import MagicMock
+
+            mock_lc_loader = MagicMock()
+            mock_lc_loader.return_value.load.return_value = [
+                Document(page_content="Content")
+            ]
+
+            with patch(
+                "langchain_opendataloader_pdf.OpenDataLoaderPDFLoader", mock_lc_loader
+            ):
+                loader = OpenDataLoaderPDFLoader("test.pdf")
+                docs = loader.load()
+
+                assert len(docs) == 1
+
+    def test_load_success_custom_format(self):
+        """Successfully loads PDF with custom format."""
+        with patch.dict("sys.modules", {"langchain_opendataloader_pdf": Mock()}):
+            from unittest.mock import MagicMock
+
+            mock_lc_loader = MagicMock()
+            mock_lc_loader.return_value.load.return_value = [
+                Document(page_content="Content")
+            ]
+
+            with patch(
+                "langchain_opendataloader_pdf.OpenDataLoaderPDFLoader", mock_lc_loader
+            ):
+                loader = OpenDataLoaderPDFLoader("test.pdf", format="markdown")
+                docs = loader.load()
+
+                assert len(docs) == 1
+
+    def test_load_import_error(self):
+        """Handles ImportError gracefully."""
+        loader = OpenDataLoaderPDFLoader("test.pdf")
+        with pytest.raises(ImportError) as exc_info:
+            loader.load()
+
+        assert "langchain-opendataloader-pdf is required" in str(exc_info.value)
+
+    def test_load_runtime_error(self):
+        """Handles runtime errors gracefully."""
+        with patch.dict("sys.modules", {"langchain_opendataloader_pdf": Mock()}):
+            mock_lc_loader = Mock(side_effect=RuntimeError("PDF error"))
+
+            with patch(
+                "langchain_opendataloader_pdf.OpenDataLoaderPDFLoader", mock_lc_loader
+            ):
+                loader = OpenDataLoaderPDFLoader("test.pdf")
+                with pytest.raises(Exception):  # Will catch RuntimeError or ImportError
+                    loader.load()
+
+
 class TestPDFLoader:
     """Test main PDFLoader orchestrator."""
 
@@ -283,6 +644,36 @@ class TestPDFLoader:
         """Initializes with amazon_textract method."""
         loader = PDFLoader("test.pdf", method="amazon_textract")
         assert isinstance(loader.loader_impl, AmazonTextractPDFLoader)
+
+    def test_initialization_with_mathpix(self):
+        """Initializes with mathpix method."""
+        loader = PDFLoader("test.pdf", method="mathpix", mathpix_api_key="test")
+        assert isinstance(loader.loader_impl, MathpixPDFLoader)
+
+    def test_initialization_with_pdfplumber(self):
+        """Initializes with pdfplumber method."""
+        loader = PDFLoader("test.pdf", method="pdfplumber")
+        assert isinstance(loader.loader_impl, PDFPlumberLoader)
+
+    def test_initialization_with_pypdfium2(self):
+        """Initializes with pypdfium2 method."""
+        loader = PDFLoader("test.pdf", method="pypdfium2")
+        assert isinstance(loader.loader_impl, PyPDFium2Loader)
+
+    def test_initialization_with_pymupdf(self):
+        """Initializes with pymupdf method."""
+        loader = PDFLoader("test.pdf", method="pymupdf")
+        assert isinstance(loader.loader_impl, PyMuPDFLoader)
+
+    def test_initialization_with_pymupdf4llm(self):
+        """Initializes with pymupdf4llm method."""
+        loader = PDFLoader("test.pdf", method="pymupdf4llm")
+        assert isinstance(loader.loader_impl, PyMuPDF4LLMLoader)
+
+    def test_initialization_with_opendataloader(self):
+        """Initializes with opendataloader method."""
+        loader = PDFLoader("test.pdf", method="opendataloader")
+        assert isinstance(loader.loader_impl, OpenDataLoaderPDFLoader)
 
     def test_initialization_with_invalid_method(self):
         """Raises ValueError for invalid method."""

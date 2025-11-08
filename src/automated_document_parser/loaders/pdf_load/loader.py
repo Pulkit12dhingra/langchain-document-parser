@@ -12,6 +12,12 @@ from .base import BasePDFLoader, PDFLoaderMethod
 from .pypdf_loader import PyPDFLoaderImpl
 from .unstructured_loader import UnstructuredPDFLoader
 from .textract_loader import AmazonTextractPDFLoader
+from .mathpix_loader import MathpixPDFLoader
+from .pdfplumber_loader import PDFPlumberLoader
+from .pypdfium2_loader import PyPDFium2Loader
+from .pymupdf_loader import PyMuPDFLoader
+from .pymupdf4llm_loader import PyMuPDF4LLMLoader
+from .opendataloader_loader import OpenDataLoaderPDFLoader
 
 logger = logging.getLogger(__name__)
 
@@ -20,6 +26,12 @@ PDF_LOADER_REGISTRY = {
     "pypdf": PyPDFLoaderImpl,
     "unstructured": UnstructuredPDFLoader,
     "amazon_textract": AmazonTextractPDFLoader,
+    "mathpix": MathpixPDFLoader,
+    "pdfplumber": PDFPlumberLoader,
+    "pypdfium2": PyPDFium2Loader,
+    "pymupdf": PyMuPDFLoader,
+    "pymupdf4llm": PyMuPDF4LLMLoader,
+    "opendataloader": OpenDataLoaderPDFLoader,
 }
 
 
@@ -56,6 +68,8 @@ class PDFLoader:
                     - region_name: AWS region (default: 'us-east-2')
                 For unstructured:
                     - api_key: Unstructured API key (or set UNSTRUCTURED_API_KEY env var)
+                For mathpix:
+                    - mathpix_api_key: Mathpix API key (or set MATHPIX_API_KEY env var)
 
         Raises:
             ValueError: If method is not supported and no loader_class is provided
