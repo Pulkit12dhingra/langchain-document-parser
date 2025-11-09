@@ -1,4 +1,4 @@
-.PHONY: lint test requirements all build publish-test publish-pypi
+.PHONY: lint test requirements all build publish-test publish-pypi release
 
 all: lint test
 
@@ -74,4 +74,23 @@ docs-serve:
 	@echo "Starting documentation server..."
 	@echo "Open http://localhost:8000 in your browser"
 	cd docs/_build/html && python -m http.server 8000
+
+release: format test
+	@echo "Creating release from pyproject.toml version..."
+	@VERSION=$$(uv run python -c "import tomllib; print(tomllib.load(open('pyproject.toml', 'rb'))['project']['version'])"); \
+	echo "Version: $$VERSION"; \
+	read -p "Create and push tag v$$VERSION? (yes/N): " confirm; \
+	if [ "$$confirm" != "yes" ]; then \
+	  echo "Release cancelled."; exit 1; \
+	fi; \
+	if git rev-parse "v$$VERSION" >/dev/null 2>&1; then \
+	  echo "Error: Tag v$$VERSION already exists!"; \
+	  exit 1; \
+	fi; \
+	echo "Creating tag v$$VERSION..."; \
+	git tag -a "v$$VERSION" -m "Release version $$VERSION"; \
+	echo "Pushing tag to origin..."; \
+	git push origin "v$$VERSION"; \
+	echo "Tag v$$VERSION created and pushed!"; \
+	echo "GitHub Actions will now build and publish the release."
 
