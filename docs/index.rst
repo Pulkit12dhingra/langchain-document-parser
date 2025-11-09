@@ -54,6 +54,10 @@ Installation
 Basic Usage
 ~~~~~~~~~~~
 
+**Step 1: Automatic File Type Detection**
+
+The parser automatically detects file types and loads them with sensible defaults:
+
 .. code-block:: python
 
    from automated_document_parser import DocumentParser
@@ -64,12 +68,57 @@ Basic Usage
    # Parse a single document (auto-detects file type)
    documents = parser.parse("path/to/document.pdf")
 
-   # Parse multiple documents
+   # Parse multiple documents (auto-detects each file type)
    files = ["doc1.txt", "data.csv", "report.pdf"]
    results = parser.parse_multiple(files)
 
+**Step 2: Specify Loading Methods**
+
+You can specify loading methods and parameters that apply to all appropriate files:
+
+.. code-block:: python
+
+   # Specify PDF loading method for all PDFs
+   files = ["doc1.txt", "data.csv", "report.pdf", "paper.pdf"]
+   results = parser.parse_multiple(
+       files,
+       pdf_loader_method="pdfplumber"  # Applies to all PDF files
+   )
+
+   # Specify encoding for text files
+   results = parser.parse_multiple(
+       files,
+       encoding="utf-8"  # Applies to all text files
+   )
+
+   # Combine multiple parameters
+   results = parser.parse_multiple(
+       files,
+       pdf_loader_method="pymupdf",
+       encoding="utf-8"
+   )
+
+Single File with Parameters
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. code-block:: python
+
+   # Parse single PDF with specific method
+   documents = parser.parse(
+       "document.pdf",
+       pdf_loader_method="pdfplumber"
+   )
+
+   # Parse text file with encoding
+   documents = parser.parse(
+       "file.txt",
+       encoding="utf-8"
+   )
+
 Advanced PDF Loading
 ~~~~~~~~~~~~~~~~~~~~
+
+For more control, use PDFLoader directly:
 
 .. code-block:: python
 

@@ -24,12 +24,18 @@ class DocumentParser:
         """Initialize the DocumentParser."""
         self.loaded_files: List[str] = []
 
-    def parse(self, file_path: str | Path) -> List[Document]:
+    def parse(
+        self, file_path: str | Path, pdf_loader_method: str = "pypdf", **kwargs
+    ) -> List[Document]:
         """
         Parse a document from file path.
 
         Args:
             file_path: Path to the document file
+            pdf_loader_method: Method to use for PDF files (default: 'pypdf').
+                Options: 'pypdf', 'unstructured', 'amazon_textract', 'mathpix',
+                'pdfplumber', 'pypdfium2', 'pymupdf', 'pymupdf4llm', 'opendataloader'
+            **kwargs: Additional keyword arguments for the loader (e.g., encoding, api_key)
 
         Returns:
             List of LangChain Document objects
@@ -41,8 +47,13 @@ class DocumentParser:
 
         Example:
             >>> parser = DocumentParser()
+            >>> # Basic usage with auto-detection
             >>> docs = parser.parse("document.pdf")
-            >>> print(f"Loaded {len(docs)} documents")
+            >>> # Specify PDF loading method
+            >>> docs = parser.parse("document.pdf", pdf_loader_method="pdfplumber")
+            >>> # Pass additional parameters
+            >>> docs = parser.parse("math.pdf", pdf_loader_method="mathpix",
+            ...                     mathpix_app_id="id", mathpix_app_key="key")
         """
         if not is_supported_file(file_path):
             path = Path(file_path)
@@ -51,7 +62,7 @@ class DocumentParser:
                 f"Supported types: .txt, .pdf, .csv, .json, .docx, .html, .md"
             )
 
-        loader = FileLoader(file_path)
+        loader = FileLoader(file_path, pdf_loader_method=pdf_loader_method, **kwargs)
         documents = loader.load()
 
         # Track loaded files
@@ -72,27 +83,40 @@ class DocumentParser:
         return documents
 
     def parse_multiple(
-        self, file_paths: List[Union[str, Path]]
+        self,
+        file_paths: List[Union[str, Path]],
+        pdf_loader_method: str = "pypdf",
+        **kwargs,
     ) -> dict[str, List[Document]]:
         """
-        Parse multiple documents.
+        Parse multiple documents with automatic file type detection.
 
         Args:
             file_paths: List of file paths
+            pdf_loader_method: Method to use for PDF files (default: 'pypdf').
+                Options: 'pypdf', 'unstructured', 'amazon_textract', 'mathpix',
+                'pdfplumber', 'pypdfium2', 'pymupdf', 'pymupdf4llm', 'opendataloader'
+            **kwargs: Additional keyword arguments for loaders (e.g., encoding, api_key)
 
         Returns:
             Dictionary mapping file paths to their loaded documents
 
         Example:
             >>> parser = DocumentParser()
-            >>> results = parser.parse_multiple(["doc1.pdf", "doc2.txt"])
+            >>> # Auto-detect all file types with default settings
+            >>> results = parser.parse_multiple(["doc1.pdf", "doc2.txt", "data.csv"])
+            >>> # Specify PDF method for all PDFs
+            >>> results = parser.parse_multiple(
+            ...     ["doc1.pdf", "doc2.pdf", "data.csv"],
+            ...     pdf_loader_method="pdfplumber"
+            ... )
             >>> for file, docs in results.items():
             ...     print(f"{file}: {len(docs)} documents")
         """
         results = {}
         for file_path in file_paths:
             try:
-                documents = self.parse(file_path)
+                documents = self.parse(file_path, pdf_loader_method, **kwargs)
                 results[str(file_path)] = documents
             except Exception as e:
                 logger.error(f"Failed to parse {file_path}: {e}")
