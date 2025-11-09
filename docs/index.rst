@@ -8,12 +8,12 @@ Welcome to the Automated Document Parser documentation!
 Features
 --------
 
-* 🚀 **Automatic File Type Detection** - Intelligently detects and processes 10+ file formats
-* 📄 **Multiple PDF Loaders** - 9 different PDF loading methods for various use cases
-* 🔧 **Modular Architecture** - Clean separation with ``file_load/`` and ``pdf_load/`` modules
-* 🎯 **Easy Integration** - Simple API that works seamlessly with LangChain
-* 📊 **Structured Data Support** - Handle CSV, JSON, and other structured formats
-* 🔌 **Extensible Design** - Easy to add custom loaders
+* **Automatic File Type Detection** - Intelligently detects and processes 10+ file formats
+* **Multiple PDF Loaders** - 9 different PDF loading methods for various use cases
+* **Modular Architecture** - Clean separation with ``file_load/`` and ``pdf_load/`` modules
+* **Easy Integration** - Simple API that works seamlessly with LangChain
+* **Structured Data Support** - Handle CSV, JSON, and other structured formats
+* **Extensible Design** - Easy to add custom loaders
 
 Supported File Types
 ---------------------
