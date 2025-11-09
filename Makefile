@@ -57,3 +57,21 @@ publish-pypi: build
 	@echo "Published to PyPI!"
 	@echo "Install with: pip install automated-document-parser"
 
+docs:
+	@echo "Building documentation..."
+	cd docs && $(MAKE) clean
+	cd docs && $(MAKE) html
+	@cp docs/.nojekyll docs/_build/html/
+	@echo "Documentation built successfully!"
+	@echo "Open docs/_build/html/index.html in your browser"
+
+docs-clean:
+	@echo "Cleaning documentation build..."
+	cd docs && $(MAKE) clean
+	@echo "Documentation cleaned!"
+
+docs-serve:
+	@echo "Starting documentation server..."
+	@echo "Open http://localhost:8000 in your browser"
+	cd docs/_build/html && python -m http.server 8000
+

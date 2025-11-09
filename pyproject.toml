@@ -31,6 +31,7 @@ dependencies = [
     "python-docx>=1.1.0",
     "python-magic>=0.4.27",
     "sentence-transformers>=5.1.2",
+    "sphinx>=8.2.3",
     "torch>=2.9.0",
     "transformers>=4.57.1",
 ]
@@ -46,6 +47,7 @@ dev = [
 
 [project.urls]
 Homepage = "https://github.com/Pulkit12dhingra/automated-document-parser"
+Documentation = "https://pulkit12dhingra.github.io/automated-document-parser/"
 Repository = "https://github.com/Pulkit12dhingra/automated-document-parser"
 Issues = "https://github.com/Pulkit12dhingra/automated-document-parser/issues"
 

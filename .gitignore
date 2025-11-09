@@ -85,3 +85,7 @@ uv.lock
 # Python version files
 .python-version
 
+# Sphinx documentation
+docs/_build/
+docs/_autosummary/
+
